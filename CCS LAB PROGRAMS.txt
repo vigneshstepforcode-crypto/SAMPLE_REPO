@@ -1,0 +1,1318 @@
+Ex. No: 1a				CAESAR CIPHER
+
+
+PROGRAM: 
+class caesarCipher 
+{ 
+public static String encode(String enc, int offset) 
+{ offset = offset % 26 + 26; 
+StringBuilder encoded = new StringBuilder(); for (char i : enc.toCharArray()) { 
+if (Character.isLetter(i)) { 
+if (Character.isUpperCase(i)) { 
+encoded.append((char) ('A' + (i - 'A' + offset) % 26)); 
+} else { 
+encoded.append((char) ('a' + (i - 'a' + offset) % 26)); 
+} 
+} else { 
+encoded.append(i); 
+} 
+} 
+return encoded.toString(); 
+} 
+public static String decode(String enc, int offset) 
+{ return encode(enc, 26 - offset); 
+} 
+public static void main(String[] args) throws java.lang.Exception 
+{ 
+String msg = "JJ COLLEGE OF ENGINEERING AND TECHNOLOGY"; 
+System.out.println("Simulating Caesar Cipher\n ");
+System.out.println("Input : " + msg); System.out.printf("Encrypted Message : "); 
+System.out.println(caesarCipher.encode(msg, 3)); 
+System.out.printf("Decrypted Message : "); 
+System.out.println(caesarCipher.decode(caesarCipher.encode(msg, 3), 3)); 
+} 
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CAESAR CIPHER OUTPUT: 
+
+C:\Users\abacussys1\Desktop>javac caesarCipher.java 
+C:\Users\abacussys1\Desktop>java caesarCipher 
+Simulating Caesar Cipher 
+Input : JJ COLLEGE OF ENGINEERING AND TECHNOLOGY 
+Encrypted Message : MM FROOHJH RI HQJLQHHULQJ DQG WHFKQRORJB 
+Decrypted Message : JJ COLLEGE OF ENGINEERING AND TECHNOLOGY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 1b				PLAYFAIR CIPHER
+
+
+PROGRAM: 
+import java.awt.Point; 
+class playfairCipher { 
+private static char[][] charTable; 
+private static Point[] positions; 
+private static String prepareText(String s, boolean chgJtoI) 
+{ 
+s = s.toUpperCase().replaceAll("[^A-Z]", ""); 
+return chgJtoI ? s.replace("J", "I") : s.replace("Q", ""); 
+} 
+private static void createTbl(String key, boolean chgJtoI) 
+{ charTable = new char[5][5]; positions = new Point[26]; 
+String s = prepareText(key + "ABCDEFGHIJKLMNOPQRSTUVWXYZ", chgJtoI); 
+int len = s.length(); 
+for (int i = 0, k = 0; i < len; i++) 
+{ 
+char c = s.charAt(i); 
+if (positions[c - 'A'] == null) 
+{ 
+charTable[k / 5][k % 5] = c; 
+positions[c - 'A'] = new Point(k % 5, k / 5); k++; 
+} 
+} 
+} 
+private static String codec(StringBuilder txt, int dir) 
+{ int len = txt.length(); 
+for (int i = 0; i < len; i += 2) 
+{ 
+char a = txt.charAt(i); 
+char b = txt.charAt(i + 1);
+int row1 = positions[a - 'A'].y; int row2 = positions[b - 'A'].y; 
+int col1 = positions[a - 'A'].x; 
+int col2 = positions[b - 'A'].x; 
+if (row1 == row2) { 
+col1 = (col1 + dir) % 5; col2 = (col2 + dir) % 5; 
+} 
+else if (col1 == col2) 
+{ 
+row1 = (row1 + dir) % 5; row2 = (row2 + dir) % 5; 
+} 
+else 
+{ 
+int tmp = col1; col1 = col2; col2 = tmp; 
+} 
+txt.setCharAt(i, charTable[row1][col1]); 
+txt.setCharAt(i + 1, charTable[row2][col2]); 
+} 
+return txt.toString(); 
+} 
+private static String encode(String s) 
+{ 
+StringBuilder sb = new StringBuilder(s); 
+for (int i = 0; i < sb.length(); i += 2) { 
+if (i == sb.length() - 1) 
+{ 
+sb.append(sb.length() % 2 == 1 ? 'X' : ""); 
+} 
+else if (sb.charAt(i) == sb.charAt(i + 1)) 
+{ 
+sb.insert(i + 1, 'X'); 
+} 
+} 
+return codec(sb, 1); 
+} 
+private static String decode(String s) { 
+return codec(new StringBuilder(s), 4); 
+} 
+public static void main(String[] args) throws java.lang.Exception 
+{ 
+String key = "CSE"; 
+String txt = "JJ COLLEGE OF ENGINEERING AND TECHNOLOGY"; 
+/* make sure string length is even */ /* change J to I */ boolean chgJtoI = true; 
+createTbl(key, chgJtoI); 
+String enc = encode(prepareText(txt, chgJtoI)); 
+System.out.println("Simulating Playfair Cipher\n----------------------");
+System.out.println("Input Message : " + txt); 
+System.out.println("Encrypted Message : " + enc); 
+System.out.println("Decrypted Message : " + decode(enc)); 
+} 
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PLAYFAIR CIPHER OUTPUT 
+C:\Users\abacussys1\Desktop>javac playfairCipher.java 
+C:\Users\abacussys1\Desktop>java playfairCipher 
+Simulating Playfair Cipher 
+---------------------- 
+Input Message : JJ COLLEGE OF ENGINEERING AND TECHNOLOGY 
+Encrypted Message : GZDBKMMSMGLIAMHDMAGXHOHEKHRAADOKMKHX 
+Decrypted Message : IXICOLLEGEOFENGINEERINGANDTECHNOLOGY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 1c				HILL CIPHER
+
+
+PROGRAM: 
+class hillCipher 
+{ 
+public static int[][] keymat = new int[][] { { 1, 2, 1 }, { 2, 3, 2 }, 
+{ 2, 2, 1 } }; 
+public static int[][] invkeymat = new int[][] { { -1, 0, 1 }, { 2, -1, 0 }, { -2, 2, -1 } }; 
+public static String key = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+private static String encode(char a, char b, char c) 
+{ 
+String ret = ""; 
+int x, y, z; 
+int posa = (int) a - 65; 
+int posb = (int) b - 65; 
+int posc = (int) c - 65; 
+x = posa * keymat[0][0] + posb * keymat[1][0] + posc * keymat[2][0]; 
+y = posa * keymat[0][1] + posb * keymat[1][1] + posc * keymat[2][1]; 
+z = posa * keymat[0][2] + posb * keymat[1][2] + posc * keymat[2][2]; 
+a = key.charAt(x % 26); 
+b = key.charAt(y % 26); 
+c = key.charAt(z % 26); 
+ret = "" + a + b + c; 
+return ret; 
+} 
+private static String decode(char a, char b, char c) 
+{ 
+String ret = ""; 
+int x, y, z; 
+int posa = (int) a - 65; 
+int posb = (int) b - 65;
+int posc = (int) c - 65; 
+x=posa*invkeymat[0][0]+posb*invkeymat[1][0]+posc * invkeymat[2][0];  
+y = posa * invkeymat[0][1] + posb * invkeymat[1][1] + posc* invkeymat[2][1];  
+z = posa * invkeymat[0][2] + posb * invkeymat[1][2] + posc 
+* invkeymat[2][2];  
+a = key.charAt((x % 26 < 0) ? (26 + x % 26) : (x % 26)); 
+b = key.charAt((y % 26 < 0) ? (26 + y % 26) : (y % 26));  
+c = key.charAt((z % 26 < 0) ? (26 + z % 26) : (z % 26));  
+ret = "" + a + b + c; 
+return ret;  } 
+public static void main(String[] args) throws java.lang.Exception { String msg; 
+String enc = ""; String dec = "";  
+int n; 
+msg = ("JJ COLLEGE OF ENGINEERING AND TECHNOLOGY"); 
+System.out.println("simulation of Hill Cipher\n "); 
+System.out.println("Input message : " + msg); msg = msg.toUpperCase();  
+msg = msg.replaceAll("\\s", ""); 
+n = msg.length() % 3; 
+if (n != 0)  
+{  
+for (int i = 1; i <= (3 - n); i++)  
+{ 
+msg += 'X'; 
+  } 
+ } 
+System.out.println("padded message : " + msg);  
+char[] pdchars = msg.toCharArray();  
+for (int i = 0; i < msg.length(); i += 3) { 
+enc += encode(pdchars[i], pdchars[i + 1], pdchars[i + 2]); 
+} System.out.println("encoded message : " + enc); 
+ char[] dechars = enc.toCharArray();  
+for (int i = 0; i < enc.length(); i += 3) { 
+dec += decode(dechars[i], dechars[i + 1], dechars[i + 2]); 
+}System.out.println("decoded message : " + dec); 
+} 
+ }
+
+
+
+
+
+
+
+
+
+
+
+
+HILL CIPHER OUTPUT: 
+C:\Users\abacussys1\Desktop>javac hillCipher.java 
+C:\Users\abacussys1\Desktop>java hillCipher 
+simulation of Hill Cipher 
+Input message : JJ COLLEGE OF ENGINEERING AND TECHNOLOGY 
+padded message : JJCOLLEGEOFENGINEERINGANDTECHNOLOGYX 
+encoded message : FXDGFVYIUGZCPIHDUZHGUGMTXTTQZDMLYWAZ 
+decoded message : JJCOLLEGEOFENGINEERINGANDTECHNOLOGYX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 2a		RAIL FENCE – ROW TRANSFORMATION TECHNIQUE
+
+PROGRAM: (Rail Fence) 
+#include<stdio.h> 
+#include<conio.h> 
+#include<string.h> 
+void main() 
+{ 
+int i,j,k,l; 
+char a[20],c[20],d[20]; 
+clrscr(); 
+printf("\n\t\t RAIL FENCE TECHNIQUE"); 
+printf("\n\nEnter the input string : "); 
+gets(a); 
+l=strlen(a); 
+/*Ciphering*/ 
+for(i=0,j=0;i<l;i++) 
+{ 
+if(i%2==0) 
+c[j++]=a[i]; 
+} 
+for(i=0;i<l;i++) 
+{ 
+if(i%2==1) 
+c[j++]=a[i]; 
+} 
+c[j]='\0'; 
+printf("\nCipher text after applying rail fence :"); 
+printf("\n%s",c);
+/*Deciphering*/ 
+if(l%2==0) 
+k=l/2; 
+else 
+k=(l/2)+1; 
+for(i=0,j=0;i<k;i++) 
+{ 
+d[j]=c[i]; 
+j=j+2; 
+} 
+for(i=k,j=1;i<l;i++) 
+{ 
+d[j]=c[i]; 
+j=j+2; 
+} 
+d[l]='\0'; 
+printf("\nText after decryption : "); 
+printf("%s",d); 
+getch(); 
+} 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+RAIL FENCE TECHNIQUE -RT
+Enter the input string: computer science 
+Cipher text after applying rail fence: 
+cmue cecoptrsine 
+Text after decryption: computer science
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 2a	RAIL FENCE-COLUMN TRANSFORMATION TECHNIQUE
+
+PROGRAM: (Rail Fence) 
+#include<stdio.h> 
+#include<conio.h> 
+#include<string.h> 
+void main() 
+{ 
+int i,j,k,l; 
+char a[20],c[20],d[20]; 
+clrscr(); 
+printf("\n\t\t RAIL FENCE TECHNIQUE"); 
+printf("\n\nEnter the input string : "); 
+gets(a); 
+l=strlen(a); 
+/*Ciphering*/ 
+for(i=0,j=0;i<l;i++) 
+{ 
+if(i%2==0) 
+c[j++]=a[i]; 
+} 
+for(i=0;i<l;i++) 
+{ 
+if(i%2==1) 
+c[j++]=a[i]; 
+} 
+c[j]='\0'; 
+printf("\nCipher text after applying rail fence :"); 
+printf("\n%s",c); 
+/*Deciphering*/
+if(l%2==0) 
+k=l/2; 
+else 
+k=(l/2)+1; 
+for(i=0,j=0;i<k;i++) 
+{ 
+d[j]=c[i]; 
+j=j+2; 
+} 
+for(i=k,j=1;i<l;i++) 
+{ 
+d[j]=c[i]; 
+j=j+2; 
+} 
+d[l]='\0'; 
+printf("\nText after decryption : "); 
+printf("%s",d); 
+getch(); 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+RAIL FENCE TECHNIQUE -CT
+Enter the input string: computer science 
+Cipher text after applying rail fence: 
+cmue cecoptrsine 
+Text after decryption: computer science
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 3		DATA ENCRYPTION STANDARD (DES)
+
+PROGRAM: 
+DES.java 
+import javax.swing.*; 
+import java.security.SecureRandom; 
+import javax.crypto.Cipher; 
+import javax.crypto.KeyGenerator; 
+import javax.crypto.SecretKey; 
+import javax.crypto.spec.SecretKeySpec; 
+import java.util.Random ; 
+class DES { 
+byte[] skey = new byte[1000]; 
+String skeyString; 
+static byte[] raw; 
+String inputMessage,encryptedData,decryptedMessage; 
+public DES() 
+{ 
+Try
+{ 
+generateSymmetricKey(); 
+inputMessage=JOptionPane.showInputDialog(null,"Enter 
+message to encrypt"); 
+byte[] ibyte = inputMessage.getBytes(); 
+byte[] ebyte=encrypt(raw, ibyte); 
+String encryptedData = new String(ebyte); 
+System.out.println("Encrypted message "+encryptedData); 
+JOptionPane.showMessageDialog(null,"Encrypted Data"+"\n"+encryptedData); 
+byte[] dbyte= decrypt(raw,ebyte); 
+String decryptedMessage = new String(dbyte); 
+System.out.println("Decrypted message"+decryptedMessage); 
+JOptionPane.showMessageDialog(null,"Decrypted Data"+"\n"+decryptedMessage); 
+} 
+catch(Exception e) 
+{ 
+System.out.println(e); 
+} 
+} 
+void generateSymmetricKey() { 
+try { 
+Random r = new Random(); 
+int num = r.nextInt(10000); 
+String knum = String.valueOf(num); 
+byte[] knumb = knum.getBytes(); 
+skey=getRawKey(knumb); 
+skeyString = new String(skey); 
+System.out.println("DES Symmetric key = "+skeyString); 
+} 
+catch(Exception e) 
+{ 
+System.out.println(e); 
+} 
+} 
+private static byte[] getRawKey(byte[] seed) throws Exception 
+{ 
+KeyGenerator kgen = KeyGenerator.getInstance("DES"); 
+SecureRandom sr = SecureRandom.getInstance("SHA1PRNG"); 
+sr.setSeed(seed); 
+kgen.init(56, sr); 
+SecretKey skey = kgen.generateKey(); 
+raw = skey.getEncoded(); 
+return raw; 
+} 
+private static byte[] encrypt(byte[] raw, byte[] clear) throws 
+Exception  
+{
+SecretKeySpec skeySpec = new SecretKeySpec(raw,"DES"); 
+Cipher cipher = Cipher.getInstance("DES"); 
+cipher.init(Cipher.ENCRYPT_MODE, skeySpec); 
+byte[] encrypted = cipher.doFinal(clear); 
+return encrypted; 
+} 
+private static byte[] decrypt(byte[] raw, byte[] encrypted) 
+throws Exception 
+{ 
+SecretKeySpec skeySpec = new SecretKeySpec(raw,"DES"); 
+Cipher cipher = Cipher.getInstance("DES"); 
+cipher.init(Cipher.DECRYPT_MODE, skeySpec); 
+byte[] decrypted = cipher.doFinal(encrypted); 
+return decrypted; 
+} 
+public static void main(String args[]) { 
+DES des = new DES(); 
+} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+DATA ENCRYPTION STANDARD (DES)
+Encrypted: c2df68c7c9f8a1da8b67c1dc5cbe9e1b 
+Decrypted: Hello World!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 4		ADVANCED ENCRYPTION STANDARD (AES) 
+
+PROGRAM: 
+import java.io.UnsupportedEncodingException; 
+import java.security.MessageDigest; 
+import java.security.NoSuchAlgorithmException; 
+import java.util.Arrays; 
+import java.util.Base64; 
+import javax.crypto.Cipher; 
+import javax.crypto.spec.SecretKeySpec; 
+public class AES 
+{ 
+private static SecretKeySpec secretKey; 
+private static byte[] key; 
+public static void setKey(String myKey) { 
+MessageDigest sha = null; 
+try { 
+key = myKey.getBytes("UTF-8"); 
+sha = MessageDigest.getInstance("SHA-1"); 
+key = sha.digest(key); 
+key = Arrays.copyOf(key, 16); 
+secretKey = new SecretKeySpec(key, "AES"); 
+} catch (NoSuchAlgorithmException e) { 
+e.printStackTrace(); 
+} catch (UnsupportedEncodingException e) { 
+e.printStackTrace(); 
+} 
+} 
+public static String encrypt(String strToEncrypt, String secret) { 
+try { 
+setKey(secret); 
+Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding"); 
+cipher.init(Cipher.ENCRYPT_MODE, secretKey); 
+return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes 
+("UTF-8"))); 
+} catch (Exception e)
+{ 
+System.out.println("Error while encrypting: " + e.toString()); 
+} 
+return null; 
+} 
+public static String decrypt(String strToDecrypt, String secret) { 
+try { 
+setKey(secret); 
+Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING"); 
+cipher.init(Cipher.DECRYPT_MODE, secretKey); 
+return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt))); 
+} catch (Exception e) { 
+System.out.println("Error while decrypting: " + e.toString()); 
+} 
+return null; 
+} 
+public static void main(String[] args) { 
+System.out.println("Enter the secret key: "); 
+String secretKey = System.console().readLine(); 
+System.out.println("Enter the original URL: "); 
+String originalString = System.console().readLine(); 
+String encryptedString = AES.encrypt(originalString, secretKey); 
+String decryptedString = AES.decrypt(encryptedString, secretKey); 
+System.out.println("URL Encryption Using AES Algorithm\n ----------"); 
+System.out.println("Original URL : " + originalString); 
+System.out.println("Encrypted URL : " + encryptedString); 
+System.out.println("Decrypted URL : " + decryptedString); 
+} 
+} 
+
+
+
+
+OUTPUT: 
+ADVANCED ENCRYPTION STANDARD (AES) 
+C:\Security Lab New\programs>java AES 
+Enter the secret key: annaUniversity 
+Enter the original URL: 
+www.annauniv.edu 
+URL Encryption Using AES Algorithm 
+Original URL : www.annauniv.edu 
+Encrypted URL : vibpFJW6Cvs5Y+L7t4N6YWWe07+JzS1d3CU2h3mEvEg= 
+Decrypted URL : www.annauniv.edu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 5		RSA ENCRYPTION ALGORITHM
+
+PROGRAM: 
+<html> 
+<head> 
+<title>RSA Encryption</title> 
+<meta name="viewport" content="width=device-width, initial- scale=1.0"> </head> 
+<body> 
+<center> 
+<h1>RSA Algorithm</h1> 
+<h2>Implemented Using HTML & Javascript</h2> 
+<hr> 
+<table> 
+<tr> 
+<td>Enter First Prime Number:</td> 
+<td><input type="number" value="53" id="p"></td> 
+</tr> 
+<tr> 
+<td>Enter Second Prime Number:</td> 
+<td><input type="number" value="59" id="q"></p> </td> 
+ </tr> 
+<tr>  
+<td>Enter the Message(cipher text):<br>[A=1, B=2,...]</td> <td><input type="number" 
+ value="89" id="msg"></p> </td> 
+</tr> 
+<tr> 
+<td>Public Key:</td> 
+<td> 
+<p id="publickey"></p> 
+</td> 
+</tr>
+<tr> 
+<td>Exponent:</td> 
+<td> 
+<p id="exponent"></p> 
+</td> 
+</tr> 
+<tr> 
+<td>Private Key:</td> 
+<td> 
+<p id="privatekey"></p> 
+</td> 
+</tr> 
+<tr> 
+<td>Cipher Text:</td> 
+<td> 
+<p id="ciphertext"></p> 
+</td> 
+</tr> 
+<tr> 
+<td><button onclick="RSA();">Apply RSA</button></td> </tr> 
+</table> 
+</center> 
+</body> 
+<script type="text/javascript"> function RSA()  
+{ 
+var gcd, p, q, no, n, t, e, i, x; 
+gcd = function (a, b) { return (!b) ? a : gcd(b, a % b); 
+}; 
+ p = document.getElementById('p').value; q = document.getElementById('q').value; 
+ no = document.getElementById('msg').value;  
+n = p * q; 
+t = (p - 1) * (q - 1); 
+for (e = 2; e < t; e++) { if (gcd(e, t) == 1)  
+{ 
+break; 
+} 
+} 
+for (i = 0; i < 10; i++) { x = 1 + i * t 
+if (x % e == 0) { d = x / e; break; 
+} 
+} 
+ctt = Math.pow(no, e).toFixed(0); ct = ctt % n; 
+dtt = Math.pow(ct, d).toFixed(0); dt = dtt % n; 
+document.getElementById('publickey').innerHTML=n; 
+document.getElementById('exponent').innerHTML=e; 
+document.getElementById('privatekey').innerHTML=d; 
+document.getElementById('ciphertext').innerHTML = ct;
+} 
+</script> 
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 6		DIFFIE-HELLMAN KEY EXCHANGE ALGORITHM
+
+PROGRAM: 
+class DiffieHellman  
+{ 
+public static void main(String args[]) 
+ { 
+int p = 23; /* publicly known (prime number) 
+*/ int g = 5; /* publicly known (primitive root) 
+*/ int x = 4; /* only Alice knows this secret */ int y = 3;  
+/* only Bob knows this secret */ double  
+aliceSends = (Math.pow(g, x)) % p; 
+double bobComputes = (Math.pow(aliceSends, y)) % p;  
+double bobSends = (Math.pow(g, y)) % p; 
+double aliceComputes = (Math.pow(bobSends, x)) % p;  
+double sharedSecret = (Math.pow(g, (x * y))) % p; 
+System.out.println("simulation of Diffie-Hellman key exchange algorithm\n-----------"); 
+System.out.println("Alice Sends : " + aliceSends);  
+System.out.println("Bob Computes : " + bobComputes);  
+System.out.println("Bob Sends : " + bobSends);  
+System.out.println("Alice Computes : " + aliceComputes);  
+System.out.println("Shared Secret : " + sharedSecret);  
+/* shared secrets should match and equality is transitive */ 
+if ((aliceComputes == sharedSecret) && (aliceComputes == bobComputes))  
+System.out.println("Success: Shared Secrets Matches! " + sharedSecret); 
+else 
+System.out.println("Error: Shared Secrets does not Match"); 
+} 
+} 
+ 
+ 
+
+
+
+
+
+OUTPUT: 
+C:\Users\abacussys1\Desktop>javac DiffieHellman.java 
+C:\Users\abacussys1\Desktop>java DiffieHellman 
+simulation of Diffie-Hellman key exchange algorithm
+Alice Sends : 4.0 
+Bob Computes : 18.0 
+Bob Sends : 10.0 
+Alice Computes : 18.0 
+Shared Secret : 18.0 
+Success: Shared Secrets Matches! 18.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 7		MESSAGE DIGEST OF A TEXT USING   SHA-1
+
+PROGRAM: 
+import java.security.*; 
+publicclassSHA1 
+{ 
+publicstaticvoidmain(String[]a) 
+{ 
+try  
+{ 
+MessageDigestmd=MessageDigest.getInstance("SHA1"); 
+System.out.println("Message digest object info:"); 
+System.out.println("Algorithm="+md.getAlgorithm()); 
+System.out.println("Provider="+md.getProvider()); 
+System.out.println("ToString="+md.toString()); 
+String input ="";md.update(input.getBytes()); 
+byte[]output=md.digest();System.out.println(); 
+System.out.println("SHA1(\""+input+"\")="+bytesToHex(output)); 
+input = "abc";md.update(input.getBytes()); 
+output =md.digest();System.out.println(); 
+System.out.println("SHA1(\""+input+"\")="+bytesToHex(output)); 
+input="abcdefghijklmnopqrstuvwxyz"; 
+md.update(input.getBytes()); 
+output=md.digest(); 
+System.out.println(); 
+System.out.println("SHA1(\""+input+"\")="+bytesToHex(output)); 
+System.out.println(""); 
+} 
+catch(Exception) 
+{ 
+System.out.println("Exception:"+e); 
+} 
+} 
+publicstaticStringbytesToHex(byte[]b){ 
+charhexDigit[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}; 
+StringBufferbuf=newStringBuffer(); 
+for (intj=0; j<b.length; j++) 
+{ 
+buf.append(hexDigit[(b[j]>>4)&0x0f]); 
+buf.append(hexDigit[b[j] & 0x0f]); 
+} 
+returnbuf.toString();} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+Message digestobject info:Algorithm=SHA1 
+Provider=SUNversion1.6 
+ToString = SHA1 Message Digest from SUN, <initialized> SHA1("") 
+=DA39A3EE5E6B4B0D3255BFEF95601890AFD80709SHA1("abc") 
+=A9993E364706816ABA3E25717850C26C9CD0D89D 
+SHA1("abcdefghijklmnopqrstuvwxyz")=32D10C7B8CF96570CA04CE37F2A19D84240D
+ 3A89
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 8		MESSAGE DIGEST OF A TEXT USING   MD5
+
+PROGRAM: 
+importjava.security.*; 
+public classMD5  
+{ 
+publicstaticvoidmain(String[]a) 
+{ 
+//TO Do code application logic here 
+Try 
+{ 
+MessageDigestmd=MessageDigest.getInstance("MD5"); 
+System.out.println("Message digest object info:"); 
+System.out.println("Algorithm="+md.getAlgorithm()); 
+System.out.println("Provider="+md.getProvider()); 
+System.out.println("ToString="+md.toString()); 
+String input ="";md.update(input.getBytes()); 
+byte[]output=md.digest();System.out.println(); 
+System.out.println("MD5(\""+input+"\")="+bytesToHex(output)); 
+input ="abc";md.update(input.getBytes()); 
+output =md.digest();System.out.println(); 
+System.out.println("MD5(\""+input+"\")="+bytesToHex(output)); 
+input="abcdefghijklmnopqrstuvwxyz";md.update(input.getBytes()); 
+output=md.digest(); 
+System.out.println(); 
+System.out.println("MD5(\""+input+"\")=" 
++bytesToHex(output));System.out.println(""); 
+} 
+catch(Exceptione) 
+{ 
+System.out.println("Exception:"+e); 
+}} 
+publicstaticStringbytesToHex(byte[]b) 
+{ 
+charhexDigit[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}; 
+StringBufferbuf=newStringBuffer(); 
+for (intj=0; j<b.length; j++) 
+{ 
+buf.append(hexDigit[(b[j]>>4)&0x0f]); 
+buf.append(hexDigit[b[j]&0x0f]); 
+} 
+returnbuf.toString(); 
+} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+Message digest object info:Algorithm=MD5 
+Provider=SUNversion1.6 
+ToString=MD5MessageDigestfromSUN, <initialized>MD5("")=D41D8CD98F00B204E98 
+00998ECF8427EMD5("abc")= 
+900150983CD24FB0D6963F7D28E17F72MD5 ("abcdefghijklmnopqrstuvwxyz") 
+=C3FCD3D76192E4007DFB496CCA67E13B
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ex. No: 9		DIGITAL SIGNATURE STANDARD
+
+PROGRAM: 
+ import java.util.*; 
+import java.math.BigInteger; class dsaAlg  
+{ 
+final static BigInteger one = new BigInteger("1");  
+final static BigInteger zero = new BigInteger("0");  
+public static BigInteger getNextPrime(String ans) 
+{ 
+BigInteger test = new BigInteger(ans);  
+while (!test.isProbablePrime(99)) 
+e: 
+{ 
+test = test.add(one); 
+} 
+return test; 
+} 
+public static BigInteger findQ(BigInteger n) 
+{ 
+BigInteger start = new BigInteger("2"); 
+ while (!n.isProbablePrime(99)) 
+{ 
+while (!((n.mod(start)).equals(zero))) 
+{ 
+start = start.add(one); 
+} 
+n = n.divide(start); 
+} 
+return n; 
+}
+public static BigInteger getGen(BigInteger p, BigInteger q, Random r) 
+{ 
+BigInteger h = new BigInteger(p.bitLength(), r); h = h.mod(p); 
+return h.modPow((p.subtract(one)).divide(q), p); 
+} 
+public static void main (String[] args) throws java.lang.Exception 
+{ 
+Random randObj = new Random(); 
+BigInteger p = getNextPrime("10600"); 
+ /* approximate prime */ 
+BigInteger q = findQ(p.subtract(one));  
+BigInteger g = getGen(p,q,randObj); 
+System.out.println(" \n simulation of Digital Signature Algorithm \n"); 
+System.out.println(" \n global public key components are:\n");  
+System.out.println("\np is: " + p); 
+System.out.println("\nq is: " + q); System.out.println("\ng is: " + g); 
+BigInteger x = new BigInteger(q.bitLength(), randObj); x = x.mod(q); 
+BigInteger y = g.modPow(x,p); 
+BigInteger k = new BigInteger(q.bitLength(), randObj); k = k.mod(q); 
+BigInteger r = (g.modPow(k,p)).mod(q); 
+BigInteger hashVal = new BigInteger(p.bitLength(), randObj); 
+BigInteger kInv = k.modInverse(q); 
+BigInteger s = kInv.multiply(hashVal.add(x.multiply(r)));  
+s = s.mod(q); 
+System.out.println("\nsecret information are:\n");  
+System.out.println("x (private) is:" + x);  
+System.out.println("k (secret) is: " + k);  
+System.out.println("y (public) is: " + y);  
+System.out.println("h (rndhash) is: " + hashVal);  
+System.out.println("\n generating digital signature:\n");  
+System.out.println("r is : " + r); 
+System.out.println("s is : " + s);  
+BigInteger w = s.modInverse(q); 
+BigInteger u1 = (hashVal.multiply(w)).mod(q); 
+ BigInteger u2 = (r.multiply(w)).mod(q); 
+BigInteger v = (g.modPow(u1,p)).multiply(y.modPow(u2,p));  
+v = (v.mod(p)).mod(q); 
+System.out.println("\nverifying digital signature (checkpoints)\n:");  
+System.out.println("w is : " + w); 
+System.out.println("u1 is : " + u1);  
+System.out.println("u2 is : " + u2);  
+System.out.println("v is : " + v); 
+if (v.equals(r)) 
+{ 
+System.out.println("\nsuccess: digital signature is verified!\n " + r); 
+} 
+else 
+{
+System.out.println("\n error: incorrect digital signature\n "); 
+} 
+} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT: 
+ C:\Security Lab New\programs>javac dsaAlg.java C:\Security Lab New\programs>javadsa 
+Alg simulation of Digital Signature Algorithm 
+global public key components are: 
+p is: 10601 
+q is: 53 
+g is: 6089 
+secret information are: 
+x (private) is:6 k (secret) is: 3 
+y (public) is: 1356 
+h (rndhash) is: 12619 generating digital signature: 
+r is : 2 s is : 41 
+verifying digital signature (checkpoints): 
+w is : 22 u1 is : 4 u2 is : 44 v is : 2 
+success: digital signature is verified! 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
